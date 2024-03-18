@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@types/jsonpack": "^1.1.6",
+    "@types/node": "^20.11.28",
+    "esbuild": "^0.20.2",
+    "jsonpack": "^1.1.5"
+  },
+  "dependencies": {
+    "msgpackr": "^1.10.1"
+  }
+}
