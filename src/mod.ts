@@ -28,6 +28,8 @@ export default class Mod {
     savedIndexes = {};
     ownedIDs: any[] = [];
 
+    username = '';
+
     setterFunc(obj: any, key: string, value?: any) {
         let split = key.split('.');
         for (let i = 0; i < split.length - 1; i++) {
@@ -44,13 +46,17 @@ export default class Mod {
     }
 
     onMessage(packet: any) {
-        if (packet?.[0] === 'a' && packet[4]?.[10]) {
-            this.ownedIDs = packet[4][10].map((x: any) => x.ind);
+        if (packet?.[0] === 'a') {
+            this.username = packet[3];
 
-            packet[4][10] = Array.from(
-                { length: this.skins.length },
-                (_, i) => ({ ind: i, cnt: 1, a: '' })
-            );
+            if (packet[4]?.[10]) {
+                this.ownedIDs = packet[4][10].map((x: any) => x.ind);
+
+                packet[4][10] = Array.from(
+                    { length: this.skins.length },
+                    (_, i) => ({ ind: i, cnt: 1, a: '' })
+                );
+            }
         }
 
         if (packet?.[0] === '0' && packet?.[1]) {
@@ -60,6 +66,8 @@ export default class Mod {
 
             for (let i = 0; i < allPlayers.length; i += this.PLAYER_LEN) {
                 let playerChunk = allPlayers.slice(i, i + this.PLAYER_LEN);
+
+                if (playerChunk[5] !== this.username) continue; // not self
 
                 for (let k in this.savedIndexes) {
                     let mapping =
