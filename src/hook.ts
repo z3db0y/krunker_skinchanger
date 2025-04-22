@@ -77,6 +77,7 @@ export class Hook {
         } as any;
 
         let skinsChunks = {};
+        let buildID = '';
 
         window.XMLHttpRequest = class Hooked extends XMLHttpRequest {
             open(
@@ -93,13 +94,17 @@ export class Hook {
                         let urlObj = new URL(url, location.href);
                         skinsChunks[urlObj.pathname] = this.response;
 
+                        if (!buildID) {
+                            buildID = /skins\d+-([^.]+)\.jspck$/.exec(urlObj.pathname)?.[1] ?? '';
+                        }
+
                         if (Object.keys(skinsChunks).length === mod.SKIN_FILES) {
                             try {
                                 let len = 0;
 
                                 for (let i = 0; i < mod.SKIN_FILES; i++) {
                                     len +=
-                                        skinsChunks[`/skins${i}.jspck`]
+                                        skinsChunks[buildID ? `/skins${i}-${buildID}.jspck` : `skins${i}.jspck`]
                                             .byteLength;
                                 }
 
@@ -109,12 +114,12 @@ export class Hook {
                                 for (let i = 0; i < mod.SKIN_FILES; i++) {
                                     skins.set(
                                         new Uint8Array(
-                                            skinsChunks[`/skins${i}.jspck`]
+                                            skinsChunks[buildID ? `/skins${i}-${buildID}.jspck` : `skins${i}.jspck`]
                                         ),
                                         offset
                                     );
                                     offset +=
-                                        skinsChunks[`/skins${i}.jspck`]
+                                        skinsChunks[buildID ? `/skins${i}-${buildID}.jspck` : `skins${i}.jspck`]
                                             .byteLength;
                                 }
 
