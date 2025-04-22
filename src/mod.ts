@@ -1,10 +1,9 @@
 export default class Mod {
-    // v7.2.3
+    // v7.5.0
     readonly SKIN_FILES = 2;
     readonly PLAYER_LEN = 46;
     readonly INDEX_MAP = [
         // en, 0
-        ['1'], // spray - safety check only
         ['2.0', '12.0'], // primary
         ['2.1', '12.1'], // secondary
         ['3', '13'], // hat
@@ -12,15 +11,13 @@ export default class Mod {
         ['9', '19'], // melee
         ['14', '24'], // dye
         ['15', '29'], // shoe
-        ['17', '32'], // waist
-        ['21'], // face - safety check only
-        ['21', '34'], // pet
-        ['25', '36'], // wrist
-        ['29.0', '39.0'], // charm (primary)
-        ['29.1', '39.1'], // charm (secondary)
-        ['30', '41'], // back
-        ['31', '42'], // head
-        ['32'], // player card - safety check only
+        ['16', '30'], // waist
+        ['30', '34'], // pet
+        ['34', '36'], // wrist
+        ['38.0', '39.0'], // charm (primary)
+        ['38.1', '39.1'], // charm (secondary)
+        ['39', '41'], // back
+        ['40', '42'], // head
     ];
 
     skins: any[] = [];
