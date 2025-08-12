@@ -1,7 +1,7 @@
 export default class Mod {
-    // v7.5.0
+    // v8.1.1
     readonly SKIN_FILES = 2;
-    readonly PLAYER_LEN = 46;
+    readonly PLAYER_LEN = 47;
     readonly INDEX_MAP = [
         // en, 0
         ['1'], // spray - safety check only
