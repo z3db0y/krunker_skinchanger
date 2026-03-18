@@ -1,7 +1,6 @@
 export default class Mod {
-    // v8.1.1
-    readonly SKIN_FILES = 2;
-    readonly PLAYER_LEN = 47;
+    // v9.1.1
+    readonly PLAYER_LEN = 50;
     readonly INDEX_MAP = [
         // en, 0
         ['1'], // spray - safety check only
@@ -13,19 +12,19 @@ export default class Mod {
         ['14', '24'], // dye
         ['15', '29'], // shoe
         ['16', '30'], // waist
-        ['29'], // face - safety check only
-        ['30', '34'], // pet
-        ['34', '36'], // wrist
-        ['38.0', '39.0'], // charm (primary)
-        ['38.1', '39.1'], // charm (secondary)
-        ['39', '41'], // back
-        ['40', '42'], // head
-        ['41'], // player card - safety check only
+        ['20', '33'], // face
+        ['21', '34'], // pet
+        ['25', '36'], // wrist
+        ['29.0', '39.0'], // charm (primary)
+        ['29.1', '39.1'], // charm (secondary)
+        ['30', '41'], // back
+        ['31', '42'], // head
+        ['32'], // player card - safety check only
     ];
 
     skins: any[] = [];
 
-    savedIndexes = {};
+    savedIndexes: { [k: string]: number; } = {};
     ownedIDs: any[] = [];
 
     username = '';
@@ -46,13 +45,15 @@ export default class Mod {
     }
 
     onMessage(packet: any) {
-        if (packet?.[0] === 'a') {
-            this.username = packet[3];
+        let isUpdateAccount = packet?.[0] === 'ua';
 
-            if (packet[4]?.[10]) {
-                this.ownedIDs = packet[4][10].map((x: any) => x.ind);
+        if (packet?.[0] === 'a' || isUpdateAccount) {
+            if (!isUpdateAccount) this.username = packet[3];
 
-                packet[4][10] = Array.from(
+            if (packet[isUpdateAccount ? 1 : 4]?.[10]) {
+                this.ownedIDs = packet[isUpdateAccount ? 1 : 4][10].map((x: any) => x.ind);
+
+                packet[isUpdateAccount ? 1 : 4][10] = Array.from(
                     { length: this.skins.length },
                     (_, i) => ({ ind: i, cnt: 1, a: '' })
                 );
@@ -79,8 +80,6 @@ export default class Mod {
 
                 allPlayers.splice(i, this.PLAYER_LEN, ...playerChunk); // replace
             }
-
-            console.log('packet', packet);
         }
 
         return packet;

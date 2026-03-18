@@ -4,10 +4,8 @@ import Mod from './mod';
 
 export class Hook {
     init(mod: Mod) {
-        const h = this;
-
         window.WebSocket = class Hooked extends WebSocket {
-            _onmessage: null | ((this: WebSocket, ev: MessageEvent) => any);
+            _onmessage: null | (((this: WebSocket, ev: MessageEvent) => any) | null) = null;
 
             constructor(url: string, protocols?: string | string[]) {
                 super(url, protocols);
@@ -41,16 +39,14 @@ export class Hook {
                     }
 
                     try {
-                        this._onmessage?.call(this, customEvent);
+                        this._onmessage?.call(this, customEvent as MessageEvent);
                     } catch (e) {
                         console.error(e);
                     }
                 });
             }
 
-            set onmessage(
-                listener: ((this: WebSocket, ev: MessageEvent) => any) | null
-            ) {
+            set onmessage(listener: ((this: WebSocket, ev: MessageEvent) => any) | null) {
                 this._onmessage = listener;
             }
 
@@ -76,9 +72,6 @@ export class Hook {
             }
         } as any;
 
-        let skinsChunks = {};
-        let buildID = '';
-
         window.XMLHttpRequest = class Hooked extends XMLHttpRequest {
             open(
                 method: string,
@@ -89,50 +82,14 @@ export class Hook {
             ) {
                 super.open(method, url, async, user, password);
 
-                if (url.includes('.jspck')) {
-                    this.addEventListener('load', () => {
-                        let urlObj = new URL(url, location.href);
-                        skinsChunks[urlObj.pathname] = this.response;
+                let urlObj = new URL(url, location.href);
+                
+                if (urlObj.hostname !== 'gapi.svc.krunker.io' && urlObj.pathname !== '/data/skins') return;
 
-                        if (!buildID) {
-                            buildID = /skins\d+-([^.]+)\.jspck$/.exec(urlObj.pathname)?.[1] ?? '';
-                        }
-
-                        if (Object.keys(skinsChunks).length === mod.SKIN_FILES) {
-                            try {
-                                let len = 0;
-
-                                for (let i = 0; i < mod.SKIN_FILES; i++) {
-                                    len +=
-                                        skinsChunks[buildID ? `/skins${i}-${buildID}.jspck` : `skins${i}.jspck`]
-                                            .byteLength;
-                                }
-
-                                let skins = new Uint8Array(len);
-                                let offset = 0;
-
-                                for (let i = 0; i < mod.SKIN_FILES; i++) {
-                                    skins.set(
-                                        new Uint8Array(
-                                            skinsChunks[buildID ? `/skins${i}-${buildID}.jspck` : `skins${i}.jspck`]
-                                        ),
-                                        offset
-                                    );
-                                    offset +=
-                                        skinsChunks[buildID ? `/skins${i}-${buildID}.jspck` : `skins${i}.jspck`]
-                                            .byteLength;
-                                }
-
-                                let s: any = jsonpack.unpack(
-                                    new TextDecoder().decode(skins)
-                                );
-                                mod.onSkinsLoaded(s);
-                            } catch (e) {
-                                console.log(e);
-                            }
-                        }
-                    });
-                }
+                this.addEventListener('load', () => {
+                    let skins: any = jsonpack.unpack(new TextDecoder().decode(this.response));
+                    mod.onSkinsLoaded(skins);
+                });
             }
         } as any;
     }
