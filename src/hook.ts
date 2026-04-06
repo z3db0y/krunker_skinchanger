@@ -3,14 +3,20 @@ import * as jsonpack from 'jsonpack';
 import Mod from './mod';
 
 export class Hook {
-    init(mod: Mod) {
+	init(mod: Mod) {
+		const websocket = window.WebSocket;
+		const xhr = window.XMLHttpRequest;
+
         window.WebSocket = class Hooked extends WebSocket {
             _onmessage: null | (((this: WebSocket, ev: MessageEvent) => any) | null) = null;
 
             constructor(url: string, protocols?: string | string[]) {
-                super(url, protocols);
+				super(url, protocols);
 
-                this.addEventListener('message', (ev) => {
+				let urlObj = new URL(url, location.href);
+				if (urlObj.hostname.endsWith('.krunker.io')) window.WebSocket = websocket;
+
+				this.addEventListener('message', (ev) => {
                     let customEvent = {
                         isTrusted: true,
                         data: ev.data,
@@ -83,10 +89,11 @@ export class Hook {
                 super.open(method, url, async, user, password);
 
                 let urlObj = new URL(url, location.href);
-                
-                if (urlObj.hostname !== 'gapi.svc.krunker.io' && urlObj.pathname !== '/data/skins') return;
+				if (urlObj.hostname !== 'gapi.svc.krunker.io' && urlObj.pathname !== '/data/skins') return;
 
-                this.addEventListener('load', () => {
+				window.XMLHttpRequest = xhr;
+
+				this.addEventListener('load', () => {
                     let skins: any = jsonpack.unpack(new TextDecoder().decode(this.response));
                     mod.onSkinsLoaded(skins);
                 });

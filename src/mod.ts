@@ -1,7 +1,7 @@
 export default class Mod {
     // v9.1.1
-    readonly PLAYER_LEN = 50;
-    readonly INDEX_MAP = [
+    readonly PLAYER_DATA_LENGTH = 50;
+    readonly PACKET_SKIN_INDEXES = [
         // en, 0
         ['1'], // spray - safety check only
         ['2.0', '12.0'], // primary
@@ -24,8 +24,8 @@ export default class Mod {
 
     skins: any[] = [];
 
-    savedIndexes: { [k: string]: number; } = {};
-    ownedIDs: any[] = [];
+    savedSkinIndexes: { [k: string]: number; } = {};
+    ownedSkinIDs: any[] = [];
 
     username = '';
 
@@ -51,7 +51,7 @@ export default class Mod {
             if (!isUpdateAccount) this.username = packet[3];
 
             if (packet[isUpdateAccount ? 1 : 4]?.[10]) {
-                this.ownedIDs = packet[isUpdateAccount ? 1 : 4][10].map((x: any) => x.ind);
+                this.ownedSkinIDs = packet[isUpdateAccount ? 1 : 4][10].map((x: any) => x.ind);
 
                 packet[isUpdateAccount ? 1 : 4][10] = Array.from(
                     { length: this.skins.length },
@@ -63,22 +63,22 @@ export default class Mod {
         if (packet?.[0] === '0' && packet?.[1]) {
             let allPlayers = packet[1];
 
-            if (allPlayers.length % this.PLAYER_LEN !== 0) return packet;
+            if (allPlayers.length % this.PLAYER_DATA_LENGTH !== 0) return packet;
 
-            for (let i = 0; i < allPlayers.length; i += this.PLAYER_LEN) {
-                let playerChunk = allPlayers.slice(i, i + this.PLAYER_LEN);
+            for (let i = 0; i < allPlayers.length; i += this.PLAYER_DATA_LENGTH) {
+                let playerChunk = allPlayers.slice(i, i + this.PLAYER_DATA_LENGTH);
 
                 if (playerChunk[5] !== this.username) continue; // not self
 
-                for (let k in this.savedIndexes) {
+                for (let k in this.savedSkinIndexes) {
                     let mapping =
-                        this.INDEX_MAP.find((x) => x[0] === k)?.[1] || '';
-                    let id = this.savedIndexes[k];
+                        this.PACKET_SKIN_INDEXES.find((x) => x[0] === k)?.[1] || '';
+                    let id = this.savedSkinIndexes[k];
 
                     if (mapping) this.setterFunc(playerChunk, mapping, id);
                 }
 
-                allPlayers.splice(i, this.PLAYER_LEN, ...playerChunk); // replace
+                allPlayers.splice(i, this.PLAYER_DATA_LENGTH, ...playerChunk); // replace
             }
         }
 
@@ -87,14 +87,14 @@ export default class Mod {
 
     onSend(packet: any) {
         if (packet?.[0] === 'en' && packet[1]) {
-            for (let i = 0; i < this.INDEX_MAP.length; i++) {
-                let id = this.setterFunc(packet[1], this.INDEX_MAP[i][0]);
+            for (let i = 0; i < this.PACKET_SKIN_INDEXES.length; i++) {
+                let id = this.setterFunc(packet[1], this.PACKET_SKIN_INDEXES[i][0]);
 
-                this.savedIndexes[this.INDEX_MAP[i][0]] = id ?? -1;
+                this.savedSkinIndexes[this.PACKET_SKIN_INDEXES[i][0]] = id ?? -1;
                 this.setterFunc(
                     packet[1],
-                    this.INDEX_MAP[i][0],
-                    this.ownedIDs.includes(id) ? id : -1
+                    this.PACKET_SKIN_INDEXES[i][0],
+                    this.ownedSkinIDs.includes(id) ? id : -1
                 );
             }
         }
