@@ -15,7 +15,7 @@ export default async function rebuild() {
         `// ==UserScript==
 // @name         Krunker skinchanger
 // @namespace    ss
-// @version      69
+// @version      70
 // @description  zedboy is the goat, as per usual
 // @author       zedboy
 // @match        *://*.krunker.io/*
