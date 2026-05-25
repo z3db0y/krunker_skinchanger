@@ -1,6 +1,6 @@
 export default class Mod {
     // v9.1.1
-    readonly PLAYER_DATA_LENGTH = 50;
+    readonly PLAYER_DATA_LENGTH = 51;
     readonly PACKET_SKIN_INDEXES = [
         // en, 0
         ['1'], // spray - safety check only
